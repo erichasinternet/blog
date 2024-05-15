@@ -1,21 +1,38 @@
-import { BlogPosts } from 'app/components/posts'
+import { BlogPosts } from "app/components/posts";
 
 export default function Page() {
   return (
-    <section>
-      <h1 className="mb-8 text-2xl font-semibold tracking-tighter">
-        My Portfolio
-      </h1>
-      <p className="mb-4">
-        {`I'm a Vim enthusiast and tab advocate, finding unmatched efficiency in
-        Vim's keystroke commands and tabs' flexibility for personal viewing
-        preferences. This extends to my support for static typing, where its
-        early error detection ensures cleaner code, and my preference for dark
-        mode, which eases long coding sessions by reducing eye strain.`}
-      </p>
-      <div className="my-8">
-        <BlogPosts />
+      <div className="drop-shadow-2xl flex flex-col items-center justify-center max-w-3xl px-8 mx-auto mt-8 sm:mt-0 sm:px-0">
+        <div>
+          <h1 className="py-4 text-4xl font-extrabold text-black tracking-tight items-center sm:text-1xl md:text-2xl lg:text-5xl md:-mb-4 flex flex-col gap-3  lg:items-start">
+            <span className="relative">Eric Lawson</span>
+            <span className="whitespace-nowrap relative ">
+              <span className="relative whitespace-nowrap">
+                <span className="absolute bg-yellow-200 -left-2 -top-1 -bottom-1 -right-2 md:-left-3 md:-top-0 md:-bottom-0 md:-right-3"></span>
+                <span className="relative font-bold text-black">
+                  @erichasinternet
+                </span>
+              </span>
+            </span>
+            <span className="relative text-xl sm:text-xl md:text-2xl lg:text-3xl">
+              Software Engineer | Denver, CO
+            </span>
+          </h1>
+        </div>
       </div>
-    </section>
-  )
+    // <section>
+    //   <div className="mt-8 text-center">
+    //     <h1 className="text-2xl font-extrabold tracking-tighter">
+    //       Eric Lawson
+    //     </h1>
+    //     <p className="leading-5 font-bold text-zinc-400">@erichasinternet</p>
+    //   </div>
+    //   <p className="mt-8 mb-4 text-center">
+    //     {`Software Engineer | Denver, CO`}
+    //   </p>
+    //   <div className="mt-16 my-8">
+    //     <BlogPosts />
+    //   </div>
+    // </section>
+  );
 }

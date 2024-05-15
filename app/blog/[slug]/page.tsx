@@ -57,7 +57,7 @@ export default function Blog({ params }) {
   }
 
   return (
-    <section>
+    <div className="flex flex-col items-center justify-center max-w-3xl px-8 mx-auto mt-8 sm:mt-0 sm:px-0">
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -80,7 +80,7 @@ export default function Blog({ params }) {
           }),
         }}
       />
-      <h1 className="title font-semibold text-2xl tracking-tighter">
+      <h1 className="title mt-8 font-bold text-2xl text-center tracking-tighter">
         {post.metadata.title}
       </h1>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">
@@ -91,6 +91,6 @@ export default function Blog({ params }) {
       <article className="prose">
         <CustomMDX source={post.content} />
       </article>
-    </section>
+    </div>
   )
 }
