@@ -12,24 +12,6 @@ const navItems = {
 export function Navbar() {
   return (
     <aside className="tracking-tight">
-      {/* <nav className="nav" id="navigation">
-  <ul className="nav__list">
-    
-    
-      <li>
-        <a href="/">about</a>
-      </li>
-    
-      <li>
-        <a href="/blog">blog</a>
-      </li>
-    
-      <li>
-        <a href="https://github.com/erichasinternet">github</a>
-      </li>
-    
-  </ul>
-</nav> */}
       <div className="lg:sticky lg:top-20">
         <nav
           className="flex flex-row items-center justify-center relative px-0 pb-0 fade md:overflow-auto scroll-pr-6 md:relative"
@@ -56,9 +38,7 @@ export function Navbar() {
               href="https://github.com/erichasinternet"
             >
               <span className="hover:before:block hover:before:absolute hover:before:-inset-1 hover:before:bg-yellow-200 relative">
-                <span className="relative font-bold">
-                  github
-                </span>
+                <span className="relative font-bold">github</span>
               </span>
             </a>
           </div>
