@@ -4,7 +4,7 @@ This is my personal blog. It's a place for me to share my thoughts.
 
 ## I want a blog like this one.
 
-This blog was created using on a free Vercel template. You can check out the template I used here:
+This blog was created using a free Vercel template. You can check out the template I used here:
 
 https://portfolio-blog-starter.vercel.app
 
