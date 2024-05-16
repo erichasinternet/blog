@@ -1,6 +1,6 @@
 # My personal blog: erichasinternet.com
 
-This is my personal blog. It's a place for me to share my thoughts.
+[This](https://www.erichasinternet.com/ "The homepage of my blog") is my personal blog. It's a place for me to share my thoughts.
 
 ## I want a blog like this one.
 
