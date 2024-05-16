@@ -52,11 +52,11 @@ export function generateMetadata({ params }) {
 }
 
 export default function Blog({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug);
-
+  const post = getBlogPosts().find((post) => post.slug === params.slug);
   if (!post) {
     notFound();
   }
+  const dateToISO = new Date(post.metadata.publishedAt).toISOString();
 
   return (
     <div className="flex flex-col items-center justify-center max-w-3xl px-8 mx-auto mt-8 sm:mt-0 sm:px-0">
@@ -68,8 +68,8 @@ export default function Blog({ params }) {
             "@context": "https://schema.org",
             "@type": "BlogPosting",
             headline: post.metadata.title,
-            datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
+            datePublished: dateToISO,
+            dateModified: dateToISO,
             description: post.metadata.summary,
             image: post.metadata.image
               ? `${baseUrl}${post.metadata.image}`
@@ -77,9 +77,7 @@ export default function Blog({ params }) {
             url: `${baseUrl}/blog/${post.slug}`,
             author: {
               "@type": "Person",
-              name: `Eric's Portfolio & Blog`,
-              givenName: "Eric",
-              familyName: "Lawson",
+              name: "Eric Lawson",
             },
           }),
         }}
