@@ -23,7 +23,7 @@ export function Navbar() {
                 <Link
                   key={path}
                   href={path}
-                  className="transition-all font-bold dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1"
+                  className="transition-all font-bold dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1 hover:dark:text-black"
                 >
                   <span className="hover:before:block hover:before:absolute hover:before:-inset-1 hover:before:bg-yellow-200 relative inline-block">
                     <span className="relative">{name}</span>
@@ -37,7 +37,7 @@ export function Navbar() {
               target="_blank"
               href="https://github.com/erichasinternet"
             >
-              <span className="hover:before:block hover:before:absolute hover:before:-inset-1 hover:before:bg-yellow-200 relative">
+              <span className="hover:before:block hover:before:absolute hover:before:-inset-1 hover:before:bg-yellow-200 relative hover:dark:text-black">
                 <span className="relative font-bold">github</span>
               </span>
             </a>

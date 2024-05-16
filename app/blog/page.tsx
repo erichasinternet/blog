@@ -11,7 +11,7 @@ export default function Page() {
       <div>
         <h1 className="py-4 text-4xl font-extrabold text-black tracking-tight items-center sm:text-1xl md:text-2xl lg:text-5xl md:-mb-4 flex flex-col gap-3  lg:items-start">
           <span className="text-neutral-900 dark:text-neutral-100 tracking-tight before:block before:absolute before:-inset-1 before:bg-yellow-200 relative">
-            <span className="relative">Posts:</span>
+            <span className="relative dark:text-black">Posts:</span>
           </span>
           <span className="mt-8 relative text-xl sm:text-xl md:text-2xl lg:text-3xl">
             <BlogPosts />

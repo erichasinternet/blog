@@ -2,7 +2,7 @@ export default function Page() {
   return (
     <div className="drop-shadow-2xl flex flex-col items-center justify-center max-w-3xl px-8 mx-auto mt-8 sm:mt-0 sm:px-0">
       <div>
-        <h1 className="py-4 text-4xl font-extrabold text-black tracking-tight items-center sm:text-1xl md:text-2xl lg:text-5xl md:-mb-4 flex flex-col gap-3  lg:items-start">
+        <h1 className="py-4 text-4xl font-extrabold text-black tracking-tight items-center sm:text-1xl md:text-2xl lg:text-5xl md:-mb-4 flex flex-col gap-3 lg:items-start dark:text-white">
           <span className="relative">Eric Lawson</span>
           <span className="whitespace-nowrap relative ">
             <span className="relative whitespace-nowrap">
