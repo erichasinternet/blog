@@ -6,19 +6,19 @@
     "start": "next start"
   },
   "dependencies": {
-    "@biomejs/biome": "^2.3.13",
+    "@biomejs/biome": "^2.3.14",
     "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "^25.0.10",
-    "@types/react": "^19.2.9",
+    "@types/node": "^25.2.0",
+    "@types/react": "^19.2.11",
     "@types/react-dom": "^19.2.3",
     "geist": "^1.5.1",
-    "next": "^16.1.5",
+    "next": "^16.1.6",
     "next-mdx-remote": "^5.0.0",
     "postcss": "^8.5.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "sugar-high": "^0.9.5",
-    "tailwindcss": "^4.1.5",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   }
 }
