@@ -83,6 +83,18 @@ html {
   @apply m-0;
 }
 
+.prose figure {
+  @apply my-6;
+}
+
+.prose video {
+  @apply w-full rounded-lg border border-neutral-200 dark:border-neutral-800;
+}
+
+.prose figcaption {
+  @apply mt-2 text-sm text-neutral-600 dark:text-neutral-400;
+}
+
 .prose p {
   @apply my-4 text-neutral-800 dark:text-neutral-200;
 }

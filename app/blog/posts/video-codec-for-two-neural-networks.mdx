@@ -83,6 +83,17 @@ So the branch that mattered was a custom mask codec.
 
 We encoded the rounded semantic mask directly with a range coder. Each pixel was predicted from nearby pixels and the previous frame. The renderer got the same class tensor as before. The archive stopped paying for a video codec's version of it.
 
+This is what the result looked like. Original on the left. Inflated submission on the right.
+
+<figure>
+  <video controls muted playsInline preload="metadata" poster="/images/qzs3-comparison.jpg">
+    <source src="/videos/qzs3-comparison.mp4" type="video/mp4" />
+  </video>
+  <figcaption>
+    The generated video is not trying to fool a human. It is trying to preserve the signals the metric reads.
+  </figcaption>
+</figure>
+
 # What Shipped
 
 The rest was byte work.
