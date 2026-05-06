@@ -8,19 +8,19 @@ summary: "A compression challenge that turned into a search for what the evaluat
 
 The [comma video compression challenge](https://github.com/commaai/comma_video_compression_challenge) looked like a video codec contest.
 
-It was not.
+The scoring rule made it something stranger.
 
-A submission inflates an archive back into video frames. The score is bitrate plus distortion. But distortion is not pixel error.
+A submission inflates an archive back into video frames. The score is bitrate plus distortion. In this challenge, distortion means model-output drift.
 
 The frames go through two frozen neural networks, PoseNet and SegNet. The score compares their outputs to the outputs on the original video.
 
-So the target is not video fidelity. It is evaluator fidelity.
+The target became evaluator fidelity.
 
-That was the first trap. If you try to make the video look good, you can spend bytes on things the evaluator does not care about.
+That was the first trap. If you try to make the video look good, you can spend bytes on things the evaluator ignores.
 
 # Autoresearch
 
-I did not solve this with one clever idea. I ran an autoresearch loop.
+This took more than one clever idea. I ran an autoresearch loop.
 
 The loop was boring on purpose:
 
@@ -43,7 +43,7 @@ This produced a lot of failures:
 
 Some of these looked good on eight samples and then fell apart on the full 600.
 
-The useful artifact was not one experiment. It was the negative cache: a list of dead ends with enough numbers attached that we would not try them again.
+The useful artifact was the negative cache: a list of dead ends with enough numbers attached that we could stop revisiting them.
 
 That mattered because the benchmark had traps.
 
@@ -61,23 +61,23 @@ It started asking:
 
 > Where are the bytes going?
 
-The best baseline we had was already not storing normal video. It stored a semantic mask, a small pose stream, and a tiny neural renderer. At inflate time, the renderer generated frame pairs from those side channels.
+The best baseline we had already stored a semantic mask, a small pose stream, and a tiny neural renderer. At inflate time, the renderer generated frame pairs from those side channels.
 
-That was the right shape for this metric. It did not need to preserve pixels. It needed to preserve the things PoseNet and SegNet cared about.
+That was the right shape for this metric. PoseNet and SegNet cared about pose, segmentation, and enough surrounding texture to keep their outputs stable.
 
-But the semantic mask still lived inside an AV1 grayscale video.
+The semantic mask still lived inside an AV1 grayscale video.
 
-That was practical, but it was the wrong abstraction.
+That was practical, and still the wrong abstraction.
 
-# A Tensor, Not a Video
+# The Mask Tensor
 
-The inflater did not need a grayscale movie. It needed exact class IDs:
+The inflater needed exact class IDs:
 
 - five classes
 - 600 frames
 - one class ID per pixel
 
-A tensor, not a video.
+Five classes over 600 frames is a tensor.
 
 So the branch that mattered was a custom mask codec.
 
@@ -90,7 +90,7 @@ This is what the result looked like. Original on the left. Inflated submission o
     <source src="/videos/qzs3-comparison.mp4" type="video/mp4" />
   </video>
   <figcaption>
-    The generated video is not trying to fool a human. It is trying to preserve the signals the metric reads.
+    The generated video preserves the signals the metric reads.
   </figcaption>
 </figure>
 
@@ -100,11 +100,11 @@ The rest was byte work.
 
 We split the model payload into streams that compressed better. We quantized the pose side channel. We added a tiny per-pair router for deterministic postprocess tweaks. Then we packed everything into one archive member.
 
-Inflation does not read the original video. It does not call PoseNet or SegNet. It decodes the archive, rebuilds the mask and generator, renders frames, and writes raw video.
+Inflation skips the original video and the evaluator networks. It decodes the archive, rebuilds the mask and generator, renders frames, and writes raw video.
 
 The final submission, [`qzs3 range mask`](https://github.com/commaai/comma_video_compression_challenge/pull/81), was 215,960 bytes and got a visible score of 0.28.
 
-I do not think of it as a general video codec. It is a small generator built for two neural networks.
+I think of it as a small generator built for two neural networks.
 
 The agent helped because it kept doing the boring part: try something, measure it, write it down, keep going.
 
