@@ -83,6 +83,13 @@ So the branch that mattered was a custom mask codec.
 
 We encoded the rounded semantic mask directly with a range coder. Each pixel was predicted from nearby pixels and the previous frame. The renderer got the same class tensor as before. The archive stopped paying for a video codec's version of it.
 
+<figure>
+  <img src="/images/qzs3-pipeline-frame.jpg" alt="Original frame, semantic mask, and inflated output" />
+  <figcaption>
+    A single frame through the submission path: original frame, decoded mask tensor, inflated output.
+  </figcaption>
+</figure>
+
 This is what the result looked like. Original on the left. Inflated submission on the right.
 
 <figure>
@@ -99,6 +106,14 @@ This is what the result looked like. Original on the left. Inflated submission o
 The rest was byte work.
 
 We split the model payload into streams that compressed better. We quantized the pose side channel. We added a tiny per-pair router for deterministic postprocess tweaks. Then we packed everything into one archive member.
+
+The final archive member broke down like this:
+
+- range-coded mask: 159,011 bytes
+- split renderer payload: 55,725 bytes
+- quantized pose stream: 899 bytes
+- router actions: 225 bytes
+- zip overhead: 100 bytes
 
 Inflation skips the original video and the evaluator networks. It decodes the archive, rebuilds the mask and generator, renders frames, and writes raw video.
 

@@ -91,6 +91,10 @@ html {
   @apply w-full rounded-lg border border-neutral-200 dark:border-neutral-800;
 }
 
+.prose figure img {
+  @apply w-full rounded-lg border border-neutral-200 dark:border-neutral-800;
+}
+
 .prose figcaption {
   @apply mt-2 text-sm text-neutral-600 dark:text-neutral-400;
 }
