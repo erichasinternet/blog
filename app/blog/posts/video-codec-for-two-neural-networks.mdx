@@ -1,126 +1,196 @@
 ---
 title: "A Video Codec for Two Neural Networks"
 publishedAt: "2026-05-05"
-summary: "A compression challenge that turned into a search for what the evaluator actually cared about."
+summary: "A minute of dashcam video in 216 KB, judged by two neural networks, and the lossless coder that did most of the work."
 ---
 
-# The Wrong Target
+I shrank a one-minute dashcam video to 216 KB. That's 174 times smaller than the original. The catch is that nobody watches it. Two neural networks do, and they don't care that my rebuilt frame on the right looks like the inside of a lava lamp.
 
-The [comma video compression challenge](https://github.com/commaai/comma_video_compression_challenge) looked like a video codec contest.
+<Panels cols="2">
+  <Panel src="/images/hero-original.jpg" alt="A frame of dashcam video: a wet highway at night with two cars ahead" label="The real frame" />
+  <Panel src="/images/hero-painted.jpg" alt="The same frame rebuilt by the decoder: purple and green swirls, with the road, lane markings and cars still in place" label="The same frame, rebuilt from 216 KB" />
+</Panels>
 
-The scoring rule made it something stranger.
+Most of the savings came from one part, a five-color map of the road. I found a way to store it 27% smaller than AV1 does, with no loss at all. The trick is to guess each pixel from its neighbors. My entry finished 32nd out of 70 on the [final leaderboard](https://comma.ai/leaderboard).
 
-A submission inflates an archive back into video frames. The score is bitrate plus distortion. In this challenge, distortion means model-output drift.
+## The judges
 
-The frames go through two frozen neural networks, PoseNet and SegNet. The score compares their outputs to the outputs on the original video.
+The [comma video compression challenge](https://github.com/commaai/comma_video_compression_challenge) gives you a one-minute dashcam video. You make the smallest file you can, as long as a script can turn it back into video.
 
-The target became evaluator fidelity.
+Here's the odd part. Nobody watches the result. Two neural networks do.
 
-That was the first trap. If you try to make the video look good, you can spend bytes on things the evaluator ignores.
+The video comes in pairs of frames. The first network, SegNet, labels every pixel in the second frame of each pair: road, sky, car, and so on. The second network, PoseNet, looks at both frames and says how the camera moved, using six numbers.
 
-# Autoresearch
-
-This took more than one clever idea. I ran an autoresearch loop.
-
-The loop was boring on purpose:
+Your score adds up three things. Lower is better:
 
 ```text
-form a hypothesis
-build the smallest test
-run the official metric
-write down what happened
-kill it or keep going
+score = 100 × SegNet error
+      + √(10 × PoseNet error)
+      + 25 × (archive bytes / 37,545,489)
 ```
 
-This produced a lot of failures:
+The first two measure how far each network's answers drift from what it said about the real video. The last one is the size of your file, compared to the original video.
 
-- latent side channels
-- renderer changes
-- postprocess controls
-- learned representations
-- low-resolution video paths
-- mask perturbations
+Here's what SegNet says about a real frame, next to what it says about my rebuilt one:
 
-Some of these looked good on eight samples and then fell apart on the full 600.
+<Panels cols="3">
+  <Panel src="/images/judge-real.png" alt="SegNet's five-color answer for the real frame" label="SegNet on the real frame" />
+  <Panel src="/images/judge-painted.png" alt="SegNet's five-color answer for the painted frame" label="SegNet on the painted frame" />
+  <Panel src="/images/judge-diff.png" alt="White dots mark the 162 pixels where the two answers differ" label="Where they differ: 162 of 196,608 pixels" />
+</Panels>
 
-The useful artifact was the negative cache: a list of dead ends with enough numbers attached that we could stop revisiting them.
+They differ on 162 pixels out of about 200,000. Every one of those is on or next to an edge. PoseNet's six numbers are close too.
 
-That mattered because the benchmark had traps.
+That's all the score ever sees: one five-color picture and six numbers for each pair of frames. The color of the asphalt doesn't matter. Neither does the texture of the sky, or whether a person would call the picture a road.
 
-A candidate could look plausible and score badly. A tweak could improve PoseNet and hurt SegNet. A method could pass a small subset and regress on the full evaluator. A few extra kilobytes could erase a real gain.
+So the rebuilt video can look like this:
 
-Only the final score counted.
+<Clip src="/videos/qzs3-comparison.mp4" poster="/images/qzs3-comparison.jpg" caption="The real video on the left, the rebuilt video on the right, over eight seconds of the clip." />
 
-# Where Are the Bytes Going?
+## Store what the judges said
 
-After enough failed branches, the search stopped asking:
+If the score only reads the judges' answers, you don't need the video. You can keep the answers and build something that earns them again.
 
-> How do we make the generated video better?
+That's the idea behind [Quantizr's entry](https://github.com/commaai/comma_video_compression_challenge/pull/55). For each pair of frames, you keep three things:
 
-It started asking:
+- SegNet's answer for the second frame, the five-color map from above.
+- PoseNet's six numbers.
+- A small neural network that I call the painter. Give it a map and six numbers, and it paints both frames.
 
-> Where are the bytes going?
+Quantizr trained the painter against the two judges. It learned to paint whatever earns the right answers. Nothing rewards a picture for looking like a road, so it doesn't paint one. That's the lava lamp.
 
-The best baseline we had already stored a semantic mask, a small pose stream, and a tiny neural renderer. At inflate time, the renderer generated frame pairs from those side channels.
+I started from a smaller version of this design by [EthanYangTW](https://github.com/commaai/comma_video_compression_challenge/pull/67). Here's where its bytes went:
 
-That was the right shape for this metric. PoseNet and SegNet cared about pose, segmentation, and enough surrounding texture to keep their outputs stable.
+<Stack>
+  <Seg label="The map, stored as AV1 video" value="219472" tone="accent" />
+  <Seg label="The painter" value="56093" tone="mid" />
+  <Seg label="Pose numbers" value="899" tone="light" />
+</Stack>
 
-The semantic mask still lived inside an AV1 grayscale video.
+The map took up almost 80% of the file. If I wanted a smaller file, I had to shrink the map.
 
-That was practical, and still the wrong abstraction.
+## The map has to be perfect
 
-# The Mask Tensor
+Quantizr stored the map as grayscale AV1 video, which makes sense for 600 pictures in a row. AV1 has a quality setting called CRF. Turn it up and the file gets smaller. The picture gets a little blurry: a blotch moves, or an edge shifts by a pixel. In a normal video, nobody notices.
 
-The inflater needed exact class IDs:
+But would the painter notice? I took the exact map and squeezed it with AV1 at six settings. Then I gave each result to the painter instead of the original. The chart shows how much worse PoseNet's error got. It's a log scale, and I measured 60 pairs spread across the video. I used a different AV1 encoder than the one behind the original file. Its CRF numbers aren't comparable to anyone else's.
 
-- five classes
-- 600 frames
-- one class ID per pixel
+<Bars scale="log" unit="×" tight="true">
+  <Bar label="The exact map" value="1" emph="true" />
+  <Bar label="AV1 CRF 10, 0.3 pixels changed per frame" value="1.1" />
+  <Bar label="CRF 20, 8 pixels" value="2" />
+  <Bar label="CRF 30, 56 pixels" value="6.8" />
+  <Bar label="CRF 40, 306 pixels" value="66" />
+  <Bar label="CRF 50, 612 pixels" value="220" />
+  <Bar label="CRF 60, 1,099 pixels" value="1370" />
+</Bars>
 
-Five classes over 600 frames is a tensor.
+A frame has about 200,000 pixels. Change eight of them and PoseNet's error doubles. Change fifty-six and it gets almost seven times worse. SegNet notices much less.
 
-So the branch that mattered was a custom mask codec.
+Here are 223 changed pixels, and what they do to the painting:
 
-We encoded the rounded semantic mask directly with a range coder. Each pixel was predicted from nearby pixels and the previous frame. The renderer got the same class tensor as before. The archive stopped paying for a video codec's version of it.
+<Panels cols="2">
+  <Panel src="/images/damage-pixels.png" alt="The class map, dimmed, with 223 changed pixels in white along the horizon, lane markings and car" label="The 223 pixels that AV1 changed in this frame (CRF 50)" pixelated="true" />
+  <Panel src="/images/damage-diff.png" alt="Bright smudges on black where the painting changed, each around one of the changed pixels" label="How the painting changed, brightened five times" />
+</Panels>
 
-<figure>
-  <img src="/images/qzs3-pipeline-frame.jpg" alt="Original frame, semantic mask, and inflated output" />
-  <figcaption>
-    A single frame through the submission path: original frame, decoded mask tensor, inflated output.
-  </figcaption>
-</figure>
+Every changed pixel turns into a smudge in the painting. SegNet shrugs it off. PoseNet doesn't.
 
-This is what the result looked like. Original on the left. Inflated submission on the right.
+The kind of change matters too. I tried two kinds by hand. One moves a pixel on an edge by one step, which is what lossy codecs do all the time. The other drops a wrong-colored speck into the middle of a flat area.
 
-<figure>
-  <video controls muted playsInline preload="metadata" poster="/images/qzs3-comparison.jpg">
-    <source src="/videos/qzs3-comparison.mp4" type="video/mp4" />
-  </video>
-  <figcaption>
-    The generated video preserves the signals the metric reads.
-  </figcaption>
-</figure>
+<Duo a="Edges nudged by one pixel" b="Specks added in flat areas">
+  <Pair label="1 pixel per frame" a="1.2" b="1.8" />
+  <Pair label="4 pixels" a="2.2" b="13" />
+  <Pair label="16 pixels" a="3.7" b="65" />
+  <Pair label="40 pixels" a="8.6" b="185" />
+  <Pair label="160 pixels" a="24" b="1800" />
+</Duo>
 
-# What Shipped
+Moving forty edge pixels per frame hurt about as much as AV1 at CRF 30 does. Forty specks were more than twenty times worse than that. My guess is that the painter trained on AV1 maps, where edges wobble by a pixel, and seldom saw a speck.
 
-The rest was byte work.
+Then I tried something that sounded safe. The map should match SegNet's answer for the real frame. But AV1 had already changed about 80 pixels in each frame I tested. So I gave the painter SegNet's true answer instead.
 
-We split the model payload into streams that compressed better. We quantized the pose side channel. We added a tiny per-pair router for deterministic postprocess tweaks. Then we packed everything into one archive member.
+SegNet liked it. Its error dropped by about a third. PoseNet's error got fourteen times worse. A more accurate map didn't help. It wasn't the map the painter learned from, and that was enough.
 
-The final archive member broke down like this:
+I also tried to repair damaged maps with a patch list, a denoiser, and retraining. None of it paid off.
 
-- range-coded mask: 159,011 bytes
-- split renderer payload: 55,725 bytes
-- quantized pose stream: 899 bytes
-- router actions: 225 bytes
-- zip overhead: 100 bytes
+So the map has to match what the painter learned from, bit for bit. Lossy compression only works when the viewer can't tell the difference. This viewer is a neural network that has only ever seen one file.
 
-Inflation skips the original video and the evaluator networks. It decodes the archive, rebuilds the mask and generator, renders frames, and writes raw video.
+That makes it a lossless compression problem, and lossless looked hopeless. General-purpose compressors like zstd and Brotli made the map twice as big as AV1 did, or worse. Two codecs I wrote for maps like this did no better.
 
-The final submission, [`qzs3 range mask`](https://github.com/commaai/comma_video_compression_challenge/pull/81), was 215,960 bytes and got a visible score of 0.28.
+## Guessing pixels
 
-I think of it as a small generator built for two neural networks.
+The map changes little. About 99% of pixels have the same color as the same pixel in the previous frame. All but one pixel in 1,500 matches that pixel, the one to its left, or the one above. If you can guess each pixel from what you've already seen, you only pay when you guess wrong.
 
-The agent helped because it kept doing the boring part: try something, measure it, write it down, keep going.
+The coder reads the map one pixel at a time, down each column, left to right. Before each pixel, it looks at nine pixels it already knows: six in this frame and three in the previous one. Those nine colors are the pixel's context. For each context, the coder keeps a tally of how earlier pixels with that context turned out. Then it asks up to four questions, in order:
 
-My job was to keep asking whether the search was pointed at the real bottleneck.
+1. Is it the same color as the pixel to its left?
+2. If not, the same as the pixel above it?
+3. If not, the same as this spot in the previous frame?
+4. If not, which of the five colors is it?
+
+Each answer costs bits. The price depends on how sure the tally was.
+
+<Aside title="What a guess costs">
+A guess the coder is 99.9% sure about costs almost nothing when it's right. When it's wrong, it costs about 10 bits. The file is the total of all those charges.
+</Aside>
+
+Below is a patch of the real map, with the real numbers from the coder. Pick a pixel and see what it knew.
+
+<CoderExplorer />
+
+The decoder repeats the same updates in the same order, so the file doesn't have to store any tallies. It's about 300 lines of C++, and it decodes the whole map in a couple of seconds. [You can read it here.](https://github.com/commaai/comma_video_compression_challenge/pull/81)
+
+None of this is new. JBIG compressed black-and-white fax pages the same way. I added the previous frame and three more colors.
+
+With five colors and nine neighbors, there are about ten million possible contexts. That sounds like way too many for 118 million pixels. I'll come back to that.
+
+Here's how the map shrank, one change at a time:
+
+<Bars max="219472" unit="bytes">
+  <Bar label="AV1 video, the starting point" value="219472" />
+  <Bar label="Tallies for 5 neighbors" value="209920" />
+  <Bar label="8 neighbors" value="189654" />
+  <Bar label="9 neighbors" value="188214" />
+  <Bar label="Read column by column" value="182074" />
+  <Bar label="Let tallies remember longer" value="164766" />
+  <Bar label="Smaller tweaks" value="159011" emph="true" />
+</Bars>
+
+Two changes did most of the work. First, each tally forgets old data once it gets too big, and I'd set that limit too low. Raising it saved 17 KB with a one-line change. Second, I read the map down columns instead of across rows, which saved another 6 KB. Pixels in the same row agree a bit more often than pixels in the same column. My guess is that this made the first question easier.
+
+I also measured the best this kind of model can do on this data. My coder is within two percent of that. To go lower, I'd need a better model.
+
+## Where the bytes go
+
+Stored at one byte per pixel, the map would be 118 MB. My coder gets it down to 159 KB. That's about one bit for every 93 pixels.
+
+<Panels cols="3">
+  <Panel src="/images/bits-map.png" alt="The class map for one frame" label="The map, frame 200" pixelated="true" />
+  <Panel src="/images/bits-frame.png" alt="Bits spent on each pixel of that frame, bright along edges" label="Bits spent on this frame: 273 bytes" pixelated="true" />
+  <Panel src="/images/bits-all.png" alt="Bits spent on each pixel summed over all 600 frames, concentrated in a band around the horizon and along lane markings" label="Bits spent over all 600 frames" top="sky: 260 bytes" bottom="hood: 76 bytes" pixelated="true" />
+</Panels>
+
+Almost all the bytes go to the edges between colors. Those pixels make up about 2% of the map and use about 95% of the bytes.
+
+The top third of every frame is sky, and nothing else. It never changes, so the coder learns it fast. All 600 skies together cost about 260 bytes. That is the exact length of this paragraph. The hood at the bottom costs only 76 bytes, about one short sentence.
+
+<Clip src="/videos/bytes-in-motion.mp4" poster="/images/bytes-in-motion.jpg" loop="true" caption="Ten maps a second. The bright points are the bits: edges that moved, and new things appearing." />
+
+Remember the ten million contexts? The coder only ever uses about seven thousand of them, and half of all the bytes go to fifteen.
+
+## The result
+
+The final file is 216 KB:
+
+<Stack>
+  <Seg label="The map, range-coded" value="159011" tone="accent" />
+  <Seg label="The painter" value="55725" tone="mid" />
+  <Seg label="Everything else" value="1224" tone="light" />
+</Stack>
+
+The map is about three quarters of it. The rest is the painter and a few small extras.
+
+I did most of the searching with an AI agent. It tried one idea at a time and kept a list of what failed, so we didn't repeat dead ends.
+
+The file scored 0.288, and the contest maintainers tagged it as a "new approach."
