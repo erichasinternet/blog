@@ -61,7 +61,7 @@ export default async function Blog({ params }) {
   const dateToISO = new Date(post.metadata.publishedAt).toISOString();
 
   return (
-    <div className="flex flex-col items-center justify-center max-w-3xl px-8 mx-auto mt-8 sm:mt-0 sm:px-0">
+    <div className="flex flex-col items-center justify-center w-full max-w-3xl px-1 mx-auto mt-8 sm:mt-0 sm:px-0">
       <script
         type="application/ld+json"
         suppressHydrationWarning

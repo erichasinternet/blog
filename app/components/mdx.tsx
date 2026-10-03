@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { highlight } from 'sugar-high'
 import React from 'react'
+import CoderExplorer from './coder-explorer'
+import { Aside, Bar, Bars, Clip, Duo, Pair, Panel, Panels, Seg, Stack } from './post-ui'
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
@@ -97,6 +99,17 @@ let components = {
   a: CustomLink,
   code: Code,
   Table,
+  Aside,
+  Bar,
+  Bars,
+  Clip,
+  Duo,
+  Pair,
+  Panel,
+  Panels,
+  Seg,
+  Stack,
+  CoderExplorer,
 }
 
 export function CustomMDX(props) {
