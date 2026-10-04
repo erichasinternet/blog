@@ -1,0 +1,44 @@
+---
+const navItems = {
+  "/": {
+    name: "home",
+  },
+  "/blog": {
+    name: "blog",
+  },
+};
+---
+
+<aside class="tracking-tight">
+  <div class="lg:sticky lg:top-20">
+    <nav
+      class="flex flex-row items-center justify-center relative px-0 pb-0 fade md:overflow-auto scroll-pr-6 md:relative"
+      id="nav"
+    >
+      <div class="flex flex-row space-x-0 px-4">
+        {
+          Object.entries(navItems).map(([path, { name }]) => (
+            <a
+              href={path}
+              class="transition-all font-bold dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1 hover:dark:text-black"
+            >
+              <span class="hover:before:block hover:before:absolute hover:before:-inset-1 hover:before:bg-yellow-200 relative inline-block">
+                <span class="relative">{name}</span>
+              </span>
+            </a>
+          ))
+        }
+        <a
+          class="transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1"
+          rel="noopener noreferrer"
+          target="_blank"
+          href="https://github.com/erichasinternet"
+        >
+          <span class="hover:before:block hover:before:absolute hover:before:-inset-1 hover:before:bg-yellow-200 relative hover:dark:text-black">
+            <span class="relative font-bold">github</span>
+          </span>
+        </a>
+      </div>
+    </nav>
+  </div>
+</aside>

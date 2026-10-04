@@ -1,0 +1,9 @@
+---
+interface Props {
+  cols?: string;
+}
+
+const { cols = "2" } = Astro.props;
+---
+
+<div class={`post-panels cols-${cols}`}><slot /></div>

@@ -1,0 +1,91 @@
+---
+import { renderCard } from "../coder-explorer/card";
+import {
+  COLORS,
+  curAt,
+  examples,
+  H,
+  NAMES,
+  prevAt,
+  W,
+} from "../coder-explorer/model";
+import patch from "../coder-explorer/patch.json";
+
+const views = [
+  ["colors", "Colors"],
+  ["bits", "Bits spent"],
+  ["changes", "Changed since last frame"],
+] as const;
+
+const bits = patch.bits.reduce((sum, b) => sum + b, 0);
+const costly = patch.bits.filter((b) => b >= 4).length;
+let changed = 0;
+for (let y = 0; y < H; y++) {
+  for (let x = 0; x < W; x++) {
+    if (curAt(x, y, 0, 0) !== prevAt(x, y, 0, 0)) changed++;
+  }
+}
+---
+
+<figure class="coder-explorer" data-coder-explorer>
+  <div class="ce-bar">
+    <div class="ce-tabs" role="tablist" aria-label="View">
+      {
+        views.map(([view, label], i) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={i === 0 ? "true" : "false"}
+            class={i === 0 ? "on" : ""}
+            data-view={view}
+          >
+            {label}
+          </button>
+        ))
+      }
+    </div>
+    <div class="ce-examples">
+      <span>Try:</span>
+      <button type="button" data-pick="free">a free pixel</button>
+      <button type="button" data-pick="edge">an edge that moved</button>
+      <button type="button" data-pick="surprise">the biggest surprise</button>
+    </div>
+  </div>
+
+  <canvas
+    class="ce-canvas"
+    style={`aspect-ratio: ${W} / ${H}`}
+    tabindex="0"
+    role="img"
+    aria-label="A 56 by 36 pixel patch of the class map. Hover, tap, or use arrow keys to inspect a pixel."
+  ></canvas>
+
+  <div class="ce-legend">
+    {
+      NAMES.map((name, i) => (
+        <span>
+          <i style={{ background: COLORS[i] }} />
+          {name}
+        </span>
+      ))
+    }
+    <span class="ce-total">
+      {`Whole patch: ${(W * H).toLocaleString("en-US")} pixels, ${Math.round(bits / 8)} bytes. ${changed} pixels changed since the last frame, ${costly} cost 4 bits or more.`}
+    </span>
+  </div>
+
+  <div class="ce-card" set:html={renderCard(examples.surprise)} />
+  <figcaption>
+    A 56 by 36 patch of the map from frame 200, around the horizon, two vehicles
+    and a lane marking. Hover or tap a pixel, or use the arrow keys. The numbers
+    are the real ones from the shipped coder.
+  </figcaption>
+</figure>
+
+<script>
+  import { initCoderExplorer } from "../coder-explorer/client";
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-coder-explorer]")) {
+    initCoderExplorer(root);
+  }
+</script>

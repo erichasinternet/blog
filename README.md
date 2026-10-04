@@ -2,12 +2,13 @@
 
 [This](https://www.erichasinternet.com/ "The homepage of my blog") is my personal blog. It's a place for me to share my thoughts.
 
-## I want a blog like this one.
+## Running it
 
-This blog was created using a free Vercel template. You can check out the template I used here:
+It's an [Astro](https://astro.build) site. You need Node 22.12 or newer and [Bun](https://bun.sh).
 
-https://portfolio-blog-starter.vercel.app
+```sh
+bun install
+bun run dev
+```
 
-or deploy using Vercel:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/examples/tree/main/solutions/blog&project-name=blog&repository-name=blog)
+Posts are MDX files in `src/content/blog`. `bun run build` writes the site to `dist`.

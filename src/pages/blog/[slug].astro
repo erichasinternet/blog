@@ -1,0 +1,58 @@
+---
+import { getCollection, render } from "astro:content";
+import { components } from "../../components/post";
+import Base from "../../layouts/base.astro";
+import { formatDate } from "../../lib/posts";
+import { baseUrl } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, summary, publishedAt, image } = post.data;
+
+const url =`${baseUrl}/blog/${post.id}`;
+const ogImage = new URL(image ?? `/og/${post.id}.png`, baseUrl).href;
+const isoDate = publishedAt.toISOString();
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: title,
+  datePublished: isoDate,
+  dateModified: isoDate,
+  description: summary,
+  image: ogImage,
+  url,
+  author: {
+    "@type": "Person",
+    name: "Eric Lawson",
+  },
+}).replaceAll("<", "\\u003c");
+---
+
+<Base
+  title={title}
+  description={summary}
+  article={{ url, image: ogImage, publishedTime: isoDate.slice(0, 10) }}
+>
+  <div
+    class="flex flex-col items-center justify-center w-full max-w-3xl px-1 mx-auto mt-8 sm:mt-0 sm:px-0"
+  >
+    <script type="application/ld+json" set:html={jsonLd} />
+    <h1 class="title mt-8 font-bold text-2xl text-center tracking-tighter">
+      {title}
+    </h1>
+    <div class="flex justify-between items-center mt-2 mb-8 text-sm">
+      <p class="text-sm text-neutral-600 dark:text-neutral-400">
+        {formatDate(publishedAt)}
+      </p>
+    </div>
+    <article class="prose">
+      <Content components={components} />
+    </article>
+  </div>
+</Base>

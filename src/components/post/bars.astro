@@ -1,0 +1,47 @@
+---
+/*
+ * Horizontal bars. `rows` is filled in from the <Bar> tags in the post (see
+ * src/lib/markdown.ts), so every value arrives as a string.
+ */
+interface Props {
+  rows: { label: string; value: string | number; note?: string; emph?: string }[];
+  max?: string;
+  unit?: string;
+  tight?: string;
+  scale?: string;
+}
+
+const { rows, max, unit, tight, scale } = Astro.props;
+const fmt = (n: number) => n.toLocaleString("en-US");
+const top = max ? Number(max) : Math.max(...rows.map((r) => Number(r.value)));
+const widthOf = (v: number) =>
+  scale === "log"
+    ? Math.max(2, (Math.log10(Math.max(v, 1)) / Math.log10(top)) * 100)
+    : (v / top) * 100;
+---
+
+<div class="post-bars">
+  {
+    rows.map((r) => {
+      const v = Number(r.value);
+      return (
+        <div class={`row${r.emph === "true" ? " emph" : ""}`}>
+          <div class="label">{r.label}</div>
+          <div class="track">
+            <div class="fill" style={{ width: `${widthOf(v)}%` }} />
+          </div>
+          <div class="value">
+            {fmt(v)}
+            {unit ? (
+              <span class="unit">
+                {tight === "true" ? "" : " "}
+                {unit}
+              </span>
+            ) : null}
+            {r.note ? <span class="note">{r.note}</span> : null}
+          </div>
+        </div>
+      );
+    })
+  }
+</div>

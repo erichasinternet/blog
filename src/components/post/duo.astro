@@ -1,0 +1,50 @@
+---
+/* Paired bars on a log scale. `rows` is filled in from the <Pair> tags in the post. */
+interface Props {
+  a: string;
+  b: string;
+  max?: string;
+  rows: { label: string; a: string | number; b: string | number }[];
+}
+
+const { a, b, max, rows } = Astro.props;
+const fmt = (n: number) => n.toLocaleString("en-US");
+const top = max
+  ? Number(max)
+  : Math.max(...rows.flatMap((r) => [Number(r.a), Number(r.b)]));
+const widthOf = (v: number) =>
+  Math.max(2, (Math.log10(Math.max(v, 1)) / Math.log10(top)) * 100);
+---
+
+<div class="post-duo">
+  <div class="legend">
+    <span>
+      <i class="a"></i>
+      {a}
+    </span>
+    <span>
+      <i class="b"></i>
+      {b}
+    </span>
+  </div>
+  {
+    rows.map((r) => (
+      <div class="row">
+        <div class="label">{r.label}</div>
+        <div class="lines">
+          {(["a", "b"] as const).map((k) => (
+            <div class="line">
+              <div class="track">
+                <div
+                  class={`fill ${k}`}
+                  style={{ width: `${widthOf(Number(r[k]))}%` }}
+                />
+              </div>
+              <span class="value">{fmt(Number(r[k]))}×</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+</div>

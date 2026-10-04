@@ -1,0 +1,24 @@
+---
+import { formatDate, getPosts } from "../lib/posts";
+
+const posts = await getPosts();
+---
+
+<ul>
+  {
+    posts.map((post) => (
+      <li>
+        <a class="flex flex-col space-y-1 mb-4" href={`/blog/${post.id}`}>
+          <div class="w-full my-4 flex-auto flex-col md:flex-row space-x-0 md:space-x-2">
+            <p class="text-[#5a6650] text-nowrap dark:text-neutral-400 w-[120px] tabular-nums">
+              {formatDate(post.data.publishedAt)}
+            </p>
+            <p class="text-neutral-900 dark:text-neutral-100 tracking-tight hover:underline">
+              {post.data.title}
+            </p>
+          </div>
+        </a>
+      </li>
+    ))
+  }
+</ul>

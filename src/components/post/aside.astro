@@ -1,0 +1,12 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Aside" } = Astro.props;
+---
+
+<aside class="post-aside">
+  <div class="post-aside-title">{title}</div>
+  <slot />
+</aside>

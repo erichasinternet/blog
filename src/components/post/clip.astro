@@ -1,0 +1,26 @@
+---
+interface Props {
+  src: string;
+  poster?: string;
+  caption?: string;
+  loop?: string;
+}
+
+const { src, poster, caption, loop } = Astro.props;
+const auto = loop === "true";
+---
+
+<figure>
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    poster={poster}
+    loop={auto}
+    autoplay={auto}
+  >
+    <source src={src} type="video/mp4" />
+  </video>
+  {caption ? <figcaption>{caption}</figcaption> : null}
+</figure>

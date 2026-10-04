@@ -1,0 +1,40 @@
+---
+/* One stacked bar. `rows` is filled in from the <Seg> tags in the post. */
+interface Props {
+  rows: { label: string; value: string | number; tone?: string }[];
+}
+
+const { rows } = Astro.props;
+const fmt = (n: number) => n.toLocaleString("en-US");
+const total = rows.reduce((sum, s) => sum + Number(s.value), 0);
+---
+
+<div class="post-stack">
+  <div class="bar" role="img" aria-label={`Total ${fmt(total)} bytes`}>
+    {
+      rows.map((s) => (
+        <div
+          class={`seg tone-${s.tone ?? "mid"}`}
+          style={{ flexGrow: Number(s.value), flexBasis: 0 }}
+        />
+      ))
+    }
+  </div>
+  <div class="legend">
+    {
+      rows.map((s) => (
+        <div class="item">
+          <span class={`swatch tone-${s.tone ?? "mid"}`} />
+          <span class="name">{s.label}</span>
+          <span class="num">
+            {fmt(Number(s.value))}
+            <span class="pct">
+              {" "}
+              {((Number(s.value) / total) * 100).toFixed(1)}%
+            </span>
+          </span>
+        </div>
+      ))
+    }
+  </div>
+</div>
