@@ -11,8 +11,8 @@
   },
   "routes": [
     {
-      "pattern": "www.erichasinternet.com/*",
-      "zone_name": "erichasinternet.com"
+      "pattern": "www.erichasinternet.com",
+      "custom_domain": true
     }
   ],
   "assets": {
