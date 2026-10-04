@@ -1,0 +1,17 @@
+{
+  "name": "erichasinternet-blog",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "www.erichasinternet.com/*",
+      "zone_name": "erichasinternet.com"
+    }
+  ],
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
